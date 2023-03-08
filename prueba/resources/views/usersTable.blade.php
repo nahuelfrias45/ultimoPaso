@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>Laravel</title>
 
         <!-- Fonts -->
@@ -97,10 +97,7 @@
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                     </div>
-                            <div id="userDetailsModalBody" class="modal-body text-center">
-                                <div class="container-fluid">
-                                    Add rows here
-                                </div>
+                            <div id="userDetailsModalBody" class="modal-body text-center">                               
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -117,10 +114,65 @@
                 $.ajax({
                     method: 'POST' ,
                     url: '/userDetails' ,
-                    headers: '' 
-                })
-                
-                //$("#userDetailsModal").modal({show: true});
+                    headers: {
+                        'X-CSRF-TOKEN': document.getElementsByTagName('meta')[2].content,
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify(body),
+                    success: (response) => {
+                        $('#userDetailsModalBody').empty();
+                        $("#userDetailsModal").modal({show: true});
+                        const parsedResponse = JSON.parse(response);
+                        //avatar_url
+                        //created_at
+                        //company
+                        //email
+                        //followers
+                        //following
+                        //location
+                        //login
+                        //name
+                        const avatarUrl = parsedResponse.avatar_url ?? 'Does not specify'
+                        const createdAt = new Date(parsedResponse.create_at).toLocaleDateString('es-AR') ?? 'Does not specify'
+                        const company = parsedResponse.company ?? 'Does not specify'
+                        const email = parsedResponse.email ?? 'Does not specify'
+                        const followers = parsedResponse.followers ?? 'Does not specify'
+                        const following = parsedResponse.following ?? 'Does not specify'
+                        const location = parsedResponse.location ?? 'Does not specify'
+                        const login = parsedResponse.login ?? 'Does not specify'
+                        const name = parsedResponse.name ?? 'Does not specify'
+                        const table = `<table>
+                                            <tbody>
+                                                <tr>
+                                                    <th>Avatar</th>
+                                                    <th>Create At</th> 
+                                                    <th>Company</th> 
+                                                    <th>Email</th> 
+                                                    <th>Followers</th> 
+                                                    <th>Following</th> 
+                                                    <th>location</th> 
+                                                    <th>Username</th> 
+                                                    <th>name</th>     
+                                                </tr>
+                                                <tr>
+                                                    <td><img src="${avatarUrl}" alt="avatar image" width="100" height="100"/></td>
+                                                    <td><p>${createdAt}</p></td>
+                                                    <td><p>${company}</p></td>
+                                                    <td><p>${email}</p></td>
+                                                    <td><p>${followers}</p></td>
+                                                    <td><p>${following}</p></td>
+                                                    <td><p>${location}</p></td>
+                                                    <td><p>${login}</p></td>
+                                                    <td><p>${name}</p></td>
+                                                </tr>
+                                            </tbody>                           
+                                        </table>`;        
+                        $('#userDetailsModalBody').append(table);                                                                                                                              
+                    },
+                    error: (response) => {
+                        alert('An error ocurred, please try again in a few minutes')
+                    }
+                })               
             }
             
         </script>
